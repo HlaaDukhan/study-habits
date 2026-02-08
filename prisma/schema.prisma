@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String         @id @default(cuid())
+  email          String         @unique
+  name           String?
+  passwordHash   String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  profile        UserProfile?
+  events         Event[]
+  skillProgresses SkillProgress[]
+  activePhase    ActivePhase?
+  checkIns       CheckIn[]
+  chatMessages   ChatMessage[]
+}
+
+model UserProfile {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studyGoal          String?
+  typicalStudyHours  Float?
+  biggestChallenge   String?
+  preferredTime      String?
+  phoneDataConsent   Boolean  @default(false)
+  selfAssessment     String?  // JSON string of self-assessment answers
+  onboardingComplete Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  type        String   // exam, quiz, deadline, project, other
+  date        DateTime
+  status      String   @default("upcoming") // upcoming, passed
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Skill {
+  id           String            @id @default(cuid())
+  slug         String            @unique
+  name         String
+  tier         Int
+  description  String
+  purpose      String
+  icon         String?
+  dependsOn    SkillDependency[] @relation("DependentSkill")
+  requiredFor  SkillDependency[] @relation("PrerequisiteSkill")
+  progresses   SkillProgress[]
+}
+
+model SkillDependency {
+  id               String @id @default(cuid())
+  dependentSkillId String
+  prerequisiteId   String
+  dependentSkill   Skill  @relation("DependentSkill", fields: [dependentSkillId], references: [id])
+  prerequisite     Skill  @relation("PrerequisiteSkill", fields: [prerequisiteId], references: [id])
+
+  @@unique([dependentSkillId, prerequisiteId])
+}
+
+model SkillProgress {
+  id             String   @id @default(cuid())
+  userId         String
+  skillId        String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill          Skill    @relation(fields: [skillId], references: [id])
+  status         String   @default("locked") // locked, available, active, stable, mastered
+  weekPhase      Int      @default(0) // 0=not started, 1=stabilize, 2=express, 3=probe
+  weekPhaseStart DateTime?
+  stabilityScore Float    @default(0)
+  userTask       String?  // user-defined task: time/place/action
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([userId, skillId])
+}
+
+model ActivePhase {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phase         String   @default("onboarding") // onboarding, observation, skill_training
+  phaseStart    DateTime @default(now())
+  activeSkillId String?
+  activeEventId String?
+  dayCount      Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model CheckIn {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date         DateTime
+  initiated    Boolean  @default(false) // did they study?
+  focusLevel   String?  // none, brief, focused, deep
+  decayPoint   String?  // <10m, 10-25m, 25-45m, 45-60m, no_loss
+  contextNote  String?
+  atypical     Boolean  @default(false)
+  energy       Int?     // 1-5
+  mood         Int?     // 1-5
+  backfilled   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([userId, date])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String   // user, assistant, system
+  content   String
+  metadata  String?  // JSON string for additional context
+  createdAt DateTime @default(now())
+}
