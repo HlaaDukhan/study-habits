@@ -116,7 +116,7 @@ export function SkillTree({ skills, canActivate }: SkillTreeProps) {
               <h3 className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-3">
                 Tier {tier}
               </h3>
-              <div className="flex gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {tierSkills.map((skill) => {
                   const style = statusStyles[skill.currentStatus] || statusStyles.locked;
                   return (
