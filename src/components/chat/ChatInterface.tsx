@@ -119,7 +119,7 @@ export function ChatInterface({ initialMessages }: ChatInterfaceProps) {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto space-y-4 pb-4">
         {messages.length === 0 && (
-          <div className="text-center text-gray-500 mt-20">
+          <div className="text-center text-muted-foreground/70 mt-20">
             <p className="text-lg mb-2">Your AI study coach</p>
             <p className="text-sm">
               Ask about your progress, get advice on your active skill, or just
@@ -136,7 +136,7 @@ export function ChatInterface({ initialMessages }: ChatInterfaceProps) {
               className={`max-w-[80%] rounded-xl px-4 py-3 ${
                 msg.role === "user"
                   ? "bg-[#38bdf8] text-black"
-                  : "bg-[#1a1a26] text-gray-300 border border-[#2a2a3a]"
+                  : "bg-card text-foreground/80 border border-border"
               }`}
             >
               <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
@@ -147,7 +147,7 @@ export function ChatInterface({ initialMessages }: ChatInterfaceProps) {
       </div>
 
       {/* Input */}
-      <div className="border-t border-[#2a2a3a] pt-4">
+      <div className="border-t border-border pt-4">
         <div className="flex gap-2">
           <Textarea
             ref={textareaRef}
@@ -155,7 +155,7 @@ export function ChatInterface({ initialMessages }: ChatInterfaceProps) {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask your study coach..."
-            className="bg-[#1a1a26] border-[#2a2a3a] text-white resize-none min-h-[44px] max-h-[120px]"
+            className="bg-card border-border text-foreground resize-none min-h-[44px] max-h-[120px]"
             rows={1}
           />
           <Button

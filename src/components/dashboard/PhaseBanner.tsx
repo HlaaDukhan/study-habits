@@ -30,9 +30,9 @@ export function PhaseBanner({
   const label = phaseLabels[phase] || phase;
 
   return (
-    <div className="w-full rounded-xl bg-gradient-to-r from-[#38bdf8]/10 to-[#4ade80]/10 border border-[#2a2a3a] p-4 mb-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+    <div className="w-full rounded-xl bg-gradient-to-r from-[#38bdf8]/10 to-[#4ade80]/10 border border-border p-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Badge
             variant="outline"
             className="border-[#38bdf8] text-[#38bdf8] text-xs"
@@ -40,7 +40,7 @@ export function PhaseBanner({
             {label}
           </Badge>
           {activeSkillName && (
-            <span className="text-gray-300 text-sm">
+            <span className="text-foreground/80 text-sm">
               Active: <span className="text-[#38bdf8]">{activeSkillName}</span>
             </span>
           )}
@@ -53,7 +53,7 @@ export function PhaseBanner({
             </Badge>
           )}
         </div>
-        <span className="text-gray-500 text-sm">Day {dayCount}</span>
+        <span className="text-muted-foreground/70 text-sm">Day {dayCount}</span>
       </div>
     </div>
   );

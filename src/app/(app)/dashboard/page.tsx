@@ -5,6 +5,8 @@ import { PhaseBanner } from "@/components/dashboard/PhaseBanner";
 import { ActiveSkillCard } from "@/components/dashboard/ActiveSkillCard";
 import { CheckInWidget } from "@/components/dashboard/CheckInWidget";
 import { EventCard } from "@/components/dashboard/EventCard";
+import { WeeklyTrendChart } from "@/components/dashboard/WeeklyTrendChart";
+import { SkillRadarChart } from "@/components/dashboard/SkillRadarChart";
 
 export default async function DashboardPage() {
   const session = await requireAuth();
@@ -28,7 +30,7 @@ export default async function DashboardPage() {
       prisma.checkIn.findMany({
         where: { userId },
         orderBy: { date: "desc" },
-        take: 7,
+        take: 14,
       }),
       prisma.event.findMany({
         where: { userId, status: "upcoming" },
@@ -62,6 +64,12 @@ export default async function DashboardPage() {
     }))
     .reverse();
 
+  const trendCheckIns = recentCheckIns.map((ci) => ({
+    date: ci.date.toISOString().split("T")[0],
+    initiated: ci.initiated,
+    focusLevel: ci.focusLevel,
+  }));
+
   const formattedEvents = upcomingEvents.map((e) => ({
     id: e.id,
     name: e.name,
@@ -71,6 +79,14 @@ export default async function DashboardPage() {
       (e.date.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
     ),
   }));
+
+  const radarSkills = skillProgresses
+    .sort((a, b) => a.skill.tier - b.skill.tier)
+    .map((sp) => ({
+      name: sp.skill.name,
+      status: sp.status,
+      stabilityScore: sp.stabilityScore,
+    }));
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -91,13 +107,13 @@ export default async function DashboardPage() {
             stabilityScore={activeSkillProgress.stabilityScore}
           />
         ) : (
-          <div className="bg-[#1a1a26] border border-[#2a2a3a] rounded-xl p-6">
-            <h3 className="text-white text-lg font-semibold mb-2">
+          <div className="bg-card border border-border rounded-xl p-6">
+            <h3 className="text-foreground text-lg font-semibold mb-2">
               {phase === "observation"
                 ? "Observation in Progress"
                 : "No Active Skill"}
             </h3>
-            <p className="text-gray-400 text-sm">
+            <p className="text-muted-foreground text-sm">
               {phase === "observation"
                 ? "Complete your daily check-ins. After 5+ check-ins in 7 days, you'll unlock your first skill."
                 : "Visit the Skills page to activate a skill."}
@@ -113,9 +129,21 @@ export default async function DashboardPage() {
         <EventCard events={formattedEvents} />
       </div>
 
+      {/* Skill Radar Chart */}
+      {radarSkills.length > 0 && (
+        <div className="mt-6">
+          <SkillRadarChart skills={radarSkills} />
+        </div>
+      )}
+
+      {/* Weekly trend chart */}
+      <div className="mt-6">
+        <WeeklyTrendChart checkIns={trendCheckIns} />
+      </div>
+
       {/* Skill overview */}
       <div className="mt-6">
-        <h2 className="text-white text-lg font-semibold mb-4">
+        <h2 className="text-foreground text-lg font-semibold mb-4">
           Skill Overview
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -123,8 +151,8 @@ export default async function DashboardPage() {
             .sort((a, b) => a.skill.tier - b.skill.tier)
             .map((sp) => {
               const statusColors: Record<string, string> = {
-                locked: "border-gray-700 text-gray-600",
-                available: "border-[#2a2a3a] text-gray-400",
+                locked: "border-muted-foreground/30 text-muted-foreground/60",
+                available: "border-border text-muted-foreground",
                 active: "border-[#38bdf8] text-[#38bdf8]",
                 stable: "border-[#4ade80] text-[#4ade80]",
                 mastered: "border-[#fbbf24] text-[#fbbf24]",
@@ -133,7 +161,7 @@ export default async function DashboardPage() {
               return (
                 <div
                   key={sp.id}
-                  className={`border rounded-lg p-3 bg-[#1a1a26] ${colors}`}
+                  className={`border rounded-lg p-3 bg-card ${colors}`}
                 >
                   <p className="text-xs opacity-60 mb-1">
                     Tier {sp.skill.tier}

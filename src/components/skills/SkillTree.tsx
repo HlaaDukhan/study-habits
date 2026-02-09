@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -35,15 +36,15 @@ interface SkillTreeProps {
 
 const statusStyles: Record<string, { border: string; bg: string; text: string; glow: string }> = {
   locked: {
-    border: "border-gray-700",
-    bg: "bg-[#1a1a26]",
-    text: "text-gray-600",
+    border: "border-muted-foreground/30",
+    bg: "bg-card",
+    text: "text-muted-foreground/60",
     glow: "",
   },
   available: {
-    border: "border-[#2a2a3a]",
-    bg: "bg-[#1a1a26]",
-    text: "text-gray-400",
+    border: "border-border",
+    bg: "bg-card",
+    text: "text-muted-foreground",
     glow: "",
   },
   active: {
@@ -113,7 +114,7 @@ export function SkillTree({ skills, canActivate }: SkillTreeProps) {
           const tierSkills = skills.filter((s) => s.tier === tier);
           return (
             <div key={tier}>
-              <h3 className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-3">
+              <h3 className="text-muted-foreground/70 text-xs font-medium uppercase tracking-wider mb-3">
                 Tier {tier}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -128,7 +129,7 @@ export function SkillTree({ skills, canActivate }: SkillTreeProps) {
                       <p className={`font-medium text-sm ${style.text}`}>
                         {skill.name}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1 capitalize">
+                      <p className="text-xs text-muted-foreground/70 mt-1 capitalize">
                         {skill.currentStatus}
                       </p>
                     </button>
@@ -137,7 +138,7 @@ export function SkillTree({ skills, canActivate }: SkillTreeProps) {
               </div>
               {tier < 4 && (
                 <div className="flex justify-center my-2">
-                  <div className="w-px h-6 bg-[#2a2a3a]" />
+                  <div className="w-px h-6 bg-border" />
                 </div>
               )}
             </div>
@@ -147,24 +148,24 @@ export function SkillTree({ skills, canActivate }: SkillTreeProps) {
 
       {/* Skill detail dialog */}
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
-        <DialogContent className="bg-[#1a1a26] border-[#2a2a3a] text-white max-w-md">
+        <DialogContent className="bg-card border-border text-foreground max-w-md">
           {selected && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-white">
+                <DialogTitle className="text-foreground">
                   {selected.name}
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
-                <p className="text-gray-400 text-sm">{selected.description}</p>
-                <div className="bg-[#0d0d14] rounded-lg p-3">
-                  <p className="text-xs text-gray-500 mb-1">Why this skill?</p>
-                  <p className="text-gray-300 text-sm">{selected.purpose}</p>
+                <p className="text-muted-foreground text-sm">{selected.description}</p>
+                <div className="bg-surface-inset rounded-lg p-3">
+                  <p className="text-xs text-muted-foreground/70 mb-1">Why this skill?</p>
+                  <p className="text-foreground/80 text-sm">{selected.purpose}</p>
                 </div>
 
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500">Status</span>
-                  <span className="capitalize text-gray-300">
+                  <span className="text-muted-foreground/70">Status</span>
+                  <span className="capitalize text-foreground/80">
                     {selected.currentStatus}
                   </span>
                 </div>
@@ -172,35 +173,35 @@ export function SkillTree({ skills, canActivate }: SkillTreeProps) {
                 {selected.progress && selected.currentStatus === "active" && (
                   <>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">Week</span>
-                      <span className="text-gray-300">
+                      <span className="text-muted-foreground/70">Week</span>
+                      <span className="text-foreground/80">
                         {selected.progress.weekPhase}/3
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">Stability</span>
+                      <span className="text-muted-foreground/70">Stability</span>
                       <span className="text-[#4ade80]">
                         {(selected.progress.stabilityScore * 100).toFixed(0)}%
                       </span>
                     </div>
                     {selected.progress.userTask && (
-                      <div className="bg-[#0d0d14] rounded-lg p-3">
-                        <p className="text-xs text-gray-500 mb-1">Your task</p>
-                        <p className="text-gray-300 text-sm">
+                      <div className="bg-surface-inset rounded-lg p-3">
+                        <p className="text-xs text-muted-foreground/70 mb-1">Your task</p>
+                        <p className="text-foreground/80 text-sm">
                           {selected.progress.userTask}
                         </p>
                       </div>
                     )}
                     {!selected.progress.userTask && (
                       <div className="space-y-2">
-                        <Label className="text-gray-300 text-sm">
+                        <Label className="text-foreground/80 text-sm">
                           Define your task (time/place/action)
                         </Label>
                         <Input
                           value={userTask}
                           onChange={(e) => setUserTask(e.target.value)}
                           placeholder="e.g., At 8am at my desk, I will open my textbook"
-                          className="bg-[#0d0d14] border-[#2a2a3a] text-white"
+                          className="bg-surface-inset border-border text-foreground"
                         />
                         <Button
                           onClick={() => handleSetTask(selected.id)}
@@ -225,10 +226,17 @@ export function SkillTree({ skills, canActivate }: SkillTreeProps) {
                 )}
 
                 {selected.currentStatus === "locked" && (
-                  <p className="text-gray-500 text-sm text-center">
+                  <p className="text-muted-foreground/70 text-sm text-center">
                     Complete prerequisite skills to unlock.
                   </p>
                 )}
+
+                <Link
+                  href={`/skills/${selected.slug}`}
+                  className="block text-center text-muted-foreground hover:text-[#38bdf8] text-sm mt-2 transition-colors"
+                >
+                  View full details
+                </Link>
               </div>
             </>
           )}

@@ -71,31 +71,31 @@ export default function OnboardingPage() {
             <div
               key={i}
               className={`w-2 h-2 rounded-full ${
-                i <= step ? "bg-[#38bdf8]" : "bg-[#2a2a3a]"
+                i <= step ? "bg-[#38bdf8]" : "bg-secondary"
               }`}
             />
           ))}
         </div>
 
         {step === 0 && (
-          <Card className="bg-[#1a1a26] border-[#2a2a3a]">
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white text-xl">
+              <CardTitle className="text-foreground text-xl">
                 What are you working toward?
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-gray-300">Your study goal</Label>
+                <Label className="text-foreground/80">Your study goal</Label>
                 <Input
                   value={studyGoal}
                   onChange={(e) => setStudyGoal(e.target.value)}
                   placeholder="e.g., Pass organic chemistry, improve GPA..."
-                  className="bg-[#0d0d14] border-[#2a2a3a] text-white"
+                  className="bg-surface-inset border-border text-foreground"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-gray-300">
+                <Label className="text-foreground/80">
                   How many hours do you typically study per day?
                 </Label>
                 <Input
@@ -106,7 +106,7 @@ export default function OnboardingPage() {
                   min="0"
                   max="16"
                   step="0.5"
-                  className="bg-[#0d0d14] border-[#2a2a3a] text-white"
+                  className="bg-surface-inset border-border text-foreground"
                 />
               </div>
               <Button
@@ -120,9 +120,9 @@ export default function OnboardingPage() {
         )}
 
         {step === 1 && (
-          <Card className="bg-[#1a1a26] border-[#2a2a3a]">
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white text-xl">
+              <CardTitle className="text-foreground text-xl">
                 What trips you up most?
               </CardTitle>
             </CardHeader>
@@ -138,7 +138,7 @@ export default function OnboardingPage() {
                   className={`w-full text-left justify-start py-4 ${
                     biggestChallenge === c
                       ? "border-[#38bdf8] text-[#38bdf8] bg-[#38bdf8]/10"
-                      : "border-[#2a2a3a] text-gray-400 hover:border-[#3a3a4a]"
+                      : "border-border text-muted-foreground hover:border-muted-foreground"
                   }`}
                 >
                   {c}
@@ -149,9 +149,9 @@ export default function OnboardingPage() {
         )}
 
         {step === 2 && (
-          <Card className="bg-[#1a1a26] border-[#2a2a3a]">
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white text-xl">
+              <CardTitle className="text-foreground text-xl">
                 When do you usually study?
               </CardTitle>
             </CardHeader>
@@ -168,7 +168,7 @@ export default function OnboardingPage() {
                     className={`py-4 ${
                       preferredTime === t
                         ? "border-[#38bdf8] text-[#38bdf8] bg-[#38bdf8]/10"
-                        : "border-[#2a2a3a] text-gray-400 hover:border-[#3a3a4a]"
+                        : "border-border text-muted-foreground hover:border-muted-foreground"
                     }`}
                   >
                     {t}
@@ -180,37 +180,37 @@ export default function OnboardingPage() {
         )}
 
         {step === 3 && (
-          <Card className="bg-[#1a1a26] border-[#2a2a3a]">
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white text-xl">
+              <CardTitle className="text-foreground text-xl">
                 Upcoming academic event
               </CardTitle>
-              <p className="text-gray-400 text-sm">
+              <p className="text-muted-foreground text-sm">
                 Add an exam, quiz, or deadline to anchor your training.
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-gray-300">Event name</Label>
+                <Label className="text-foreground/80">Event name</Label>
                 <Input
                   value={eventName}
                   onChange={(e) => setEventName(e.target.value)}
                   placeholder="e.g., Midterm Exam"
-                  className="bg-[#0d0d14] border-[#2a2a3a] text-white"
+                  className="bg-surface-inset border-border text-foreground"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-gray-300">Date</Label>
+                <Label className="text-foreground/80">Date</Label>
                 <Input
                   type="date"
                   value={eventDate}
                   onChange={(e) => setEventDate(e.target.value)}
-                  className="bg-[#0d0d14] border-[#2a2a3a] text-white"
+                  className="bg-surface-inset border-border text-foreground"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-gray-300">Type</Label>
-                <div className="flex gap-2">
+                <Label className="text-foreground/80">Type</Label>
+                <div className="flex flex-wrap gap-2">
                   {["exam", "quiz", "deadline", "project"].map((t) => (
                     <Button
                       key={t}
@@ -220,7 +220,7 @@ export default function OnboardingPage() {
                       className={`capitalize ${
                         eventType === t
                           ? "border-[#38bdf8] text-[#38bdf8] bg-[#38bdf8]/10"
-                          : "border-[#2a2a3a] text-gray-400"
+                          : "border-border text-muted-foreground"
                       }`}
                     >
                       {t}
@@ -239,7 +239,7 @@ export default function OnboardingPage() {
                 variant="ghost"
                 onClick={handleComplete}
                 disabled={submitting}
-                className="w-full text-gray-500 hover:text-gray-300"
+                className="w-full text-muted-foreground/70 hover:text-foreground/80"
               >
                 Skip event for now
               </Button>
@@ -251,7 +251,7 @@ export default function OnboardingPage() {
           <Button
             variant="ghost"
             onClick={() => setStep(step - 1)}
-            className="mt-4 text-gray-500 hover:text-gray-300"
+            className="mt-4 text-muted-foreground/70 hover:text-foreground/80"
           >
             Back
           </Button>

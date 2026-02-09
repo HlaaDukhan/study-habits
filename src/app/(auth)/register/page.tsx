@@ -56,29 +56,29 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0d0d14] px-4">
-      <Card className="w-full max-w-md bg-[#1a1a26] border-[#2a2a3a]">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <Card className="w-full max-w-md bg-card border-border">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl text-white">Create Account</CardTitle>
-          <CardDescription className="text-gray-400">
+          <CardTitle className="text-2xl text-foreground">Create Account</CardTitle>
+          <CardDescription className="text-muted-foreground">
             Start building better study habits
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-gray-300">
+              <Label htmlFor="name" className="text-foreground/80">
                 Name
               </Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="bg-[#0d0d14] border-[#2a2a3a] text-white"
+                className="bg-surface-inset border-border text-foreground"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-300">
+              <Label htmlFor="email" className="text-foreground/80">
                 Email
               </Label>
               <Input
@@ -86,12 +86,12 @@ export default function RegisterPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-[#0d0d14] border-[#2a2a3a] text-white"
+                className="bg-surface-inset border-border text-foreground"
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-300">
+              <Label htmlFor="password" className="text-foreground/80">
                 Password
               </Label>
               <Input
@@ -99,7 +99,7 @@ export default function RegisterPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-[#0d0d14] border-[#2a2a3a] text-white"
+                className="bg-surface-inset border-border text-foreground"
                 minLength={6}
                 required
               />
@@ -115,7 +115,7 @@ export default function RegisterPage() {
               {loading ? "Creating account..." : "Create Account"}
             </Button>
           </form>
-          <p className="text-center text-gray-400 text-sm mt-4">
+          <p className="text-center text-muted-foreground text-sm mt-4">
             Already have an account?{" "}
             <Link href="/login" className="text-[#38bdf8] hover:underline">
               Sign in

@@ -10,34 +10,34 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-white mb-6">Settings</h1>
+      <h1 className="text-2xl font-bold text-foreground mb-6">Settings</h1>
 
-      <Card className="bg-[#1a1a26] border-[#2a2a3a] mb-6">
+      <Card className="bg-card border-border mb-6">
         <CardHeader>
-          <CardTitle className="text-white text-lg">Account</CardTitle>
+          <CardTitle className="text-foreground text-lg">Account</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-gray-400 text-sm">Email</span>
-            <span className="text-gray-300 text-sm">
+            <span className="text-muted-foreground text-sm">Email</span>
+            <span className="text-foreground/80 text-sm">
               {session?.user?.email}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-gray-400 text-sm">Name</span>
-            <span className="text-gray-300 text-sm">
+            <span className="text-muted-foreground text-sm">Name</span>
+            <span className="text-foreground/80 text-sm">
               {session?.user?.name || "Not set"}
             </span>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-[#1a1a26] border-[#2a2a3a]">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white text-lg">Actions</CardTitle>
+          <CardTitle className="text-foreground text-lg">Actions</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Separator className="bg-[#2a2a3a]" />
+          <Separator className="bg-border" />
           <Button
             variant="outline"
             onClick={() => signOut({ callbackUrl: "/" })}

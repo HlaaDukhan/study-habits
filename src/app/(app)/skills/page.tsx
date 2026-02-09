@@ -36,8 +36,8 @@ export default async function SkillsPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold text-white mb-2">Skill Tree</h1>
-      <p className="text-gray-400 text-sm mb-8">
+      <h1 className="text-2xl font-bold text-foreground mb-2">Skill Tree</h1>
+      <p className="text-muted-foreground text-sm mb-8">
         Master skills from the bottom up. Each skill builds on the ones below
         it.
       </p>

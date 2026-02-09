@@ -26,9 +26,9 @@ export function CheckInWidget({
   recentCheckIns,
 }: CheckInWidgetProps) {
   return (
-    <Card className="bg-[#1a1a26] border-[#2a2a3a]">
+    <Card className="bg-card border-border">
       <CardHeader className="pb-3">
-        <CardTitle className="text-white text-lg">Daily Check-In</CardTitle>
+        <CardTitle className="text-foreground text-lg">Daily Check-In</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {todayCompleted ? (
@@ -45,7 +45,7 @@ export function CheckInWidget({
         )}
 
         <div>
-          <p className="text-xs text-gray-500 mb-2">Last 7 days</p>
+          <p className="text-xs text-muted-foreground/70 mb-2">Last 7 days</p>
           <div className="flex gap-1">
             {Array.from({ length: 7 }).map((_, i) => {
               const checkIn = recentCheckIns[6 - i];
@@ -53,9 +53,9 @@ export function CheckInWidget({
                 return (
                   <div
                     key={i}
-                    className="w-full h-8 rounded bg-[#0d0d14] flex items-center justify-center"
+                    className="w-full h-8 rounded bg-surface-inset flex items-center justify-center"
                   >
-                    <X size={10} className="text-gray-700" />
+                    <X size={10} className="text-muted-foreground/50" />
                   </div>
                 );
               }
@@ -71,7 +71,7 @@ export function CheckInWidget({
               );
             })}
           </div>
-          <div className="flex justify-between text-[10px] text-gray-600 mt-1">
+          <div className="flex justify-between text-[10px] text-muted-foreground/60 mt-1">
             <span>7d ago</span>
             <span>Today</span>
           </div>

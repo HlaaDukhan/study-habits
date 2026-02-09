@@ -15,27 +15,27 @@ interface EventCardProps {
 
 export function EventCard({ events }: EventCardProps) {
   return (
-    <Card className="bg-[#1a1a26] border-[#2a2a3a]">
+    <Card className="bg-card border-border">
       <CardHeader className="pb-3">
-        <CardTitle className="text-white text-lg">Upcoming Events</CardTitle>
+        <CardTitle className="text-foreground text-lg">Upcoming Events</CardTitle>
       </CardHeader>
       <CardContent>
         {events.length === 0 ? (
-          <p className="text-gray-500 text-sm">No upcoming events</p>
+          <p className="text-muted-foreground/70 text-sm">No upcoming events</p>
         ) : (
           <div className="space-y-3">
             {events.map((event) => (
               <div
                 key={event.id}
-                className="flex items-center justify-between p-3 bg-[#0d0d14] rounded-lg"
+                className="flex items-center justify-between p-3 bg-surface-inset rounded-lg"
               >
                 <div className="flex items-center gap-3">
                   <CalendarDays size={16} className="text-[#fbbf24]" />
                   <div>
-                    <p className="text-gray-300 text-sm font-medium">
+                    <p className="text-foreground/80 text-sm font-medium">
                       {event.name}
                     </p>
-                    <p className="text-gray-500 text-xs capitalize">
+                    <p className="text-muted-foreground/70 text-xs capitalize">
                       {event.type}
                     </p>
                   </div>
@@ -46,7 +46,7 @@ export function EventCard({ events }: EventCardProps) {
                       ? "text-red-400"
                       : event.daysUntil <= 7
                         ? "text-[#fbbf24]"
-                        : "text-gray-400"
+                        : "text-muted-foreground"
                   }`}
                 >
                   {event.daysUntil}d

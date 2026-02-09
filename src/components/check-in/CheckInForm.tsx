@@ -78,9 +78,9 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
   return (
     <div className="max-w-lg mx-auto space-y-6">
       {/* Step 1: Did you study? */}
-      <Card className="bg-[#1a1a26] border-[#2a2a3a]">
+      <Card className="bg-card border-border">
         <CardContent className="pt-6">
-          <h3 className="text-white text-lg mb-4">Did you study today?</h3>
+          <h3 className="text-foreground text-lg mb-4">Did you study today?</h3>
           <div className="flex gap-3">
             {[
               { value: true, label: "Yes" },
@@ -96,7 +96,7 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
                 className={`flex-1 py-6 ${
                   initiated === opt.value
                     ? "border-[#38bdf8] text-[#38bdf8] bg-[#38bdf8]/10"
-                    : "border-[#2a2a3a] text-gray-400 hover:border-[#3a3a4a]"
+                    : "border-border text-muted-foreground hover:border-muted-foreground"
                 }`}
               >
                 {opt.label}
@@ -108,9 +108,9 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
 
       {/* Step 2: Focus level */}
       {(step >= 1 && initiated) && (
-        <Card className="bg-[#1a1a26] border-[#2a2a3a]">
+        <Card className="bg-card border-border">
           <CardContent className="pt-6">
-            <h3 className="text-white text-lg mb-4">How was your focus?</h3>
+            <h3 className="text-foreground text-lg mb-4">How was your focus?</h3>
             <div className="grid grid-cols-2 gap-3">
               {focusOptions.map((opt) => (
                 <Button
@@ -123,7 +123,7 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
                   className={`py-6 flex flex-col items-center gap-1 h-auto ${
                     focusLevel === opt.value
                       ? "border-[#38bdf8] text-[#38bdf8] bg-[#38bdf8]/10"
-                      : "border-[#2a2a3a] text-gray-400 hover:border-[#3a3a4a]"
+                      : "border-border text-muted-foreground hover:border-muted-foreground"
                   }`}
                 >
                   <span className="font-medium">{opt.label}</span>
@@ -137,9 +137,9 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
 
       {/* Step 2.5: Decay point (Focus Endurance only) */}
       {step >= 2 && showDecay && (
-        <Card className="bg-[#1a1a26] border-[#2a2a3a]">
+        <Card className="bg-card border-border">
           <CardContent className="pt-6">
-            <h3 className="text-white text-lg mb-4">When did focus drop?</h3>
+            <h3 className="text-foreground text-lg mb-4">When did focus drop?</h3>
             <div className="grid grid-cols-3 gap-2">
               {decayOptions.map((opt) => (
                 <Button
@@ -149,7 +149,7 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
                   className={`py-4 text-sm ${
                     decayPoint === opt.value
                       ? "border-[#38bdf8] text-[#38bdf8] bg-[#38bdf8]/10"
-                      : "border-[#2a2a3a] text-gray-400 hover:border-[#3a3a4a]"
+                      : "border-border text-muted-foreground hover:border-muted-foreground"
                   }`}
                 >
                   {opt.label}
@@ -162,17 +162,17 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
 
       {/* Step 3: Context & optional fields */}
       {step >= 2 || (step >= 3 && !initiated) ? (
-        <Card className="bg-[#1a1a26] border-[#2a2a3a]">
+        <Card className="bg-card border-border">
           <CardContent className="pt-6 space-y-4">
             <div>
-              <h3 className="text-white text-lg mb-2">
-                Anything to note? <span className="text-gray-500 text-sm">(optional)</span>
+              <h3 className="text-foreground text-lg mb-2">
+                Anything to note? <span className="text-muted-foreground/70 text-sm">(optional)</span>
               </h3>
               <Textarea
                 value={contextNote}
                 onChange={(e) => setContextNote(e.target.value)}
                 placeholder="Quick context about your day..."
-                className="bg-[#0d0d14] border-[#2a2a3a] text-white resize-none"
+                className="bg-surface-inset border-border text-foreground resize-none"
                 rows={2}
               />
             </div>
@@ -182,9 +182,9 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
                 id="atypical"
                 checked={atypical}
                 onCheckedChange={(c) => setAtypical(c === true)}
-                className="border-[#2a2a3a] data-[state=checked]:bg-[#fbbf24] data-[state=checked]:border-[#fbbf24]"
+                className="border-border data-[state=checked]:bg-[#fbbf24] data-[state=checked]:border-[#fbbf24]"
               />
-              <label htmlFor="atypical" className="text-gray-400 text-sm">
+              <label htmlFor="atypical" className="text-muted-foreground text-sm">
                 Mark as atypical day (illness, travel, etc.)
               </label>
             </div>
@@ -192,7 +192,7 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
             {/* Energy & Mood bars */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-gray-400 text-xs mb-2">Energy (optional)</p>
+                <p className="text-muted-foreground text-xs mb-2">Energy (optional)</p>
                 <div className="flex gap-1">
                   {[1, 2, 3, 4, 5].map((v) => (
                     <button
@@ -201,14 +201,14 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
                       className={`flex-1 h-6 rounded ${
                         energy && v <= energy
                           ? "bg-[#38bdf8]"
-                          : "bg-[#2a2a3a]"
+                          : "bg-secondary"
                       } transition-colors`}
                     />
                   ))}
                 </div>
               </div>
               <div>
-                <p className="text-gray-400 text-xs mb-2">Mood (optional)</p>
+                <p className="text-muted-foreground text-xs mb-2">Mood (optional)</p>
                 <div className="flex gap-1">
                   {[1, 2, 3, 4, 5].map((v) => (
                     <button
@@ -217,7 +217,7 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
                       className={`flex-1 h-6 rounded ${
                         mood && v <= mood
                           ? "bg-[#4ade80]"
-                          : "bg-[#2a2a3a]"
+                          : "bg-secondary"
                       } transition-colors`}
                     />
                   ))}

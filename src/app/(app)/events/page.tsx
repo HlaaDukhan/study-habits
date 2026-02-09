@@ -57,13 +57,13 @@ export default function EventsPage() {
   const passed = events.filter((e) => e.status === "passed");
 
   if (loading) {
-    return <div className="text-gray-400">Loading events...</div>;
+    return <div className="text-muted-foreground">Loading events...</div>;
   }
 
   return (
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">Events</h1>
+        <h1 className="text-2xl font-bold text-foreground">Events</h1>
         <Button
           onClick={() => setShowForm(!showForm)}
           className="bg-[#38bdf8] hover:bg-[#38bdf8]/80 text-black"
@@ -74,29 +74,29 @@ export default function EventsPage() {
       </div>
 
       {showForm && (
-        <Card className="bg-[#1a1a26] border-[#2a2a3a] mb-6">
+        <Card className="bg-card border-border mb-6">
           <CardContent className="pt-6 space-y-4">
             <div className="space-y-2">
-              <Label className="text-gray-300">Event name</Label>
+              <Label className="text-foreground/80">Event name</Label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g., Final Exam"
-                className="bg-[#0d0d14] border-[#2a2a3a] text-white"
+                className="bg-surface-inset border-border text-foreground"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-gray-300">Date</Label>
+              <Label className="text-foreground/80">Date</Label>
               <Input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="bg-[#0d0d14] border-[#2a2a3a] text-white"
+                className="bg-surface-inset border-border text-foreground"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-gray-300">Type</Label>
-              <div className="flex gap-2">
+              <Label className="text-foreground/80">Type</Label>
+              <div className="flex flex-wrap gap-2">
                 {["exam", "quiz", "deadline", "project", "other"].map((t) => (
                   <Button
                     key={t}
@@ -106,7 +106,7 @@ export default function EventsPage() {
                     className={`capitalize ${
                       type === t
                         ? "border-[#38bdf8] text-[#38bdf8] bg-[#38bdf8]/10"
-                        : "border-[#2a2a3a] text-gray-400"
+                        : "border-border text-muted-foreground"
                     }`}
                   >
                     {t}
@@ -124,7 +124,7 @@ export default function EventsPage() {
               <Button
                 variant="ghost"
                 onClick={() => setShowForm(false)}
-                className="text-gray-400"
+                className="text-muted-foreground"
               >
                 Cancel
               </Button>
@@ -134,9 +134,9 @@ export default function EventsPage() {
       )}
 
       {/* Upcoming events */}
-      <h2 className="text-white text-lg font-semibold mb-3">Upcoming</h2>
+      <h2 className="text-foreground text-lg font-semibold mb-3">Upcoming</h2>
       {upcoming.length === 0 ? (
-        <p className="text-gray-500 text-sm mb-6">No upcoming events</p>
+        <p className="text-muted-foreground/70 text-sm mb-6">No upcoming events</p>
       ) : (
         <div className="space-y-2 mb-6">
           {upcoming.map((event) => {
@@ -147,16 +147,16 @@ export default function EventsPage() {
             return (
               <Card
                 key={event.id}
-                className="bg-[#1a1a26] border-[#2a2a3a]"
+                className="bg-card border-border"
               >
                 <CardContent className="py-3 px-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <CalendarDays size={16} className="text-[#fbbf24]" />
                     <div>
-                      <p className="text-gray-300 text-sm font-medium">
+                      <p className="text-foreground/80 text-sm font-medium">
                         {event.name}
                       </p>
-                      <p className="text-gray-500 text-xs">
+                      <p className="text-muted-foreground/70 text-xs">
                         {new Date(event.date).toLocaleDateString()} &middot;{" "}
                         <span className="capitalize">{event.type}</span>
                       </p>
@@ -169,14 +169,14 @@ export default function EventsPage() {
                           ? "text-red-400"
                           : daysUntil <= 7
                             ? "text-[#fbbf24]"
-                            : "text-gray-400"
+                            : "text-muted-foreground"
                       }`}
                     >
                       {daysUntil}d
                     </span>
                     <button
                       onClick={() => handleDelete(event.id)}
-                      className="text-gray-600 hover:text-red-400 transition-colors"
+                      className="text-muted-foreground/60 hover:text-red-400 transition-colors"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -191,26 +191,26 @@ export default function EventsPage() {
       {/* Passed events */}
       {passed.length > 0 && (
         <>
-          <h2 className="text-white text-lg font-semibold mb-3">Passed</h2>
+          <h2 className="text-foreground text-lg font-semibold mb-3">Passed</h2>
           <div className="space-y-2 opacity-60">
             {passed.map((event) => (
               <Card
                 key={event.id}
-                className="bg-[#1a1a26] border-[#2a2a3a]"
+                className="bg-card border-border"
               >
                 <CardContent className="py-3 px-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <CalendarDays size={16} className="text-gray-600" />
+                    <CalendarDays size={16} className="text-muted-foreground/60" />
                     <div>
-                      <p className="text-gray-400 text-sm">{event.name}</p>
-                      <p className="text-gray-600 text-xs">
+                      <p className="text-muted-foreground text-sm">{event.name}</p>
+                      <p className="text-muted-foreground/60 text-xs">
                         {new Date(event.date).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
                   <button
                     onClick={() => handleDelete(event.id)}
-                    className="text-gray-600 hover:text-red-400 transition-colors"
+                    className="text-muted-foreground/60 hover:text-red-400 transition-colors"
                   >
                     <Trash2 size={14} />
                   </button>

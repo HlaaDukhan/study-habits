@@ -31,7 +31,7 @@ export default async function CheckInPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-white mb-6">Daily Check-In</h1>
+      <h1 className="text-2xl font-bold text-foreground mb-6">Daily Check-In</h1>
       <CheckInForm
         activeSkillSlug={activeSkill?.skill.slug}
       />

@@ -36,18 +36,18 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0d0d14] px-4">
-      <Card className="w-full max-w-md bg-[#1a1a26] border-[#2a2a3a]">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <Card className="w-full max-w-md bg-card border-border">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl text-white">Welcome Back</CardTitle>
-          <CardDescription className="text-gray-400">
+          <CardTitle className="text-2xl text-foreground">Welcome Back</CardTitle>
+          <CardDescription className="text-muted-foreground">
             Sign in to continue your study journey
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-300">
+              <Label htmlFor="email" className="text-foreground/80">
                 Email
               </Label>
               <Input
@@ -55,12 +55,12 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-[#0d0d14] border-[#2a2a3a] text-white"
+                className="bg-surface-inset border-border text-foreground"
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-300">
+              <Label htmlFor="password" className="text-foreground/80">
                 Password
               </Label>
               <Input
@@ -68,7 +68,7 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-[#0d0d14] border-[#2a2a3a] text-white"
+                className="bg-surface-inset border-border text-foreground"
                 required
               />
             </div>
@@ -83,7 +83,7 @@ export default function LoginPage() {
               {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
-          <p className="text-center text-gray-400 text-sm mt-4">
+          <p className="text-center text-muted-foreground text-sm mt-4">
             No account?{" "}
             <Link href="/register" className="text-[#38bdf8] hover:underline">
               Register
