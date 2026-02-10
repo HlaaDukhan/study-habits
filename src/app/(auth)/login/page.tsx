@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function LoginPage() {
     const result = await signIn("credentials", {
       email,
       password,
+      rememberMe: rememberMe.toString(),
       redirect: false,
     });
 
@@ -71,6 +73,23 @@ export default function LoginPage() {
                 className="bg-surface-inset border-border text-foreground"
                 required
               />
+            </div>
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="h-4 w-4 rounded border-border bg-surface-inset accent-[#38bdf8]"
+                />
+                <span className="text-sm text-muted-foreground">Remember me</span>
+              </label>
+              <Link
+                href="/forgot-password"
+                className="text-sm text-[#38bdf8] hover:underline"
+              >
+                Forgot password?
+              </Link>
             </div>
             {error && (
               <p className="text-red-400 text-sm">{error}</p>

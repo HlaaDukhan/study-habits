@@ -9,10 +9,15 @@ declare module "next-auth" {
       image?: string | null;
     };
   }
+
+  interface User {
+    rememberMe?: boolean;
+  }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
     id: string;
+    maxAge?: number;
   }
 }
