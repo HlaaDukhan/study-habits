@@ -5,7 +5,7 @@ import { sendPasswordResetEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
-    const { email } = await req.json();
+    const { email, resend } = await req.json();
 
     if (!email) {
       return NextResponse.json(
@@ -24,11 +24,12 @@ export async function POST(req: Request) {
       return genericResponse;
     }
 
-    // Rate limit: skip if a token was created < 5 min ago
+    // Rate limit: 60s for resend, 5min for initial request
+    const cooldownMs = resend ? 60 * 1000 : 5 * 60 * 1000;
     const recentToken = await prisma.passwordResetToken.findFirst({
       where: {
         email,
-        createdAt: { gt: new Date(Date.now() - 5 * 60 * 1000) },
+        createdAt: { gt: new Date(Date.now() - cooldownMs) },
       },
     });
 

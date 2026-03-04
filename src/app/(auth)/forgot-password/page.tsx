@@ -1,20 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
+const RESEND_COOLDOWN = 60; // seconds
+
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [cooldown, setCooldown] = useState(0);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
+
+  const sendRequest = async (isResend = false) => {
     setLoading(true);
     setError("");
 
@@ -22,7 +30,7 @@ export default function ForgotPasswordPage() {
       const res = await fetch("/api/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, resend: isResend }),
       });
 
       if (!res.ok) {
@@ -30,12 +38,18 @@ export default function ForgotPasswordPage() {
         setError(data.message || "Something went wrong");
       } else {
         setSubmitted(true);
+        setCooldown(RESEND_COOLDOWN);
       }
     } catch {
       setError("Something went wrong");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await sendRequest();
   };
 
   return (
@@ -55,9 +69,22 @@ export default function ForgotPasswordPage() {
               <p className="text-[#4ade80] text-sm">
                 If an account with that email exists, we sent a reset link.
               </p>
+              <Button
+                onClick={() => sendRequest(true)}
+                disabled={loading || cooldown > 0}
+                variant="outline"
+                className="w-full border-border text-foreground hover:bg-surface-inset"
+              >
+                {loading
+                  ? "Sending..."
+                  : cooldown > 0
+                  ? `Resend email (${cooldown}s)`
+                  : "Resend email"}
+              </Button>
+              {error && <p className="text-red-400 text-sm">{error}</p>}
               <Link
                 href="/login"
-                className="text-[#38bdf8] hover:underline text-sm"
+                className="text-[#38bdf8] hover:underline text-sm block"
               >
                 Back to login
               </Link>

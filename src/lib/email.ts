@@ -1,17 +1,18 @@
 import { Resend } from "resend";
 
-function getResend() {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    throw new Error("RESEND_API_KEY is not set");
-  }
-  return new Resend(apiKey);
-}
-
 export async function sendPasswordResetEmail(email: string, token: string) {
   const resetLink = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
 
-  await getResend().emails.send({
+  if (!process.env.RESEND_API_KEY) {
+    console.log("\n--- PASSWORD RESET (local dev) ---");
+    console.log(`To: ${email}`);
+    console.log(`Reset link: ${resetLink}`);
+    console.log("----------------------------------\n");
+    return;
+  }
+
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  await resend.emails.send({
     from: "Study Habits <onboarding@resend.dev>",
     to: email,
     subject: "Reset your password",

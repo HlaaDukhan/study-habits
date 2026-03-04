@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "prisma generate --schema=prisma/schema.dev.prisma && next dev",
+    "db:setup": "prisma db push --schema=prisma/schema.dev.prisma && prisma db seed",
     "build": "prisma generate && next build",
     "postinstall": "prisma generate",
     "start": "prisma db push && npx prisma db seed; next start",
