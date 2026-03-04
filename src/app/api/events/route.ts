@@ -44,6 +44,20 @@ export async function POST(req: Request) {
     );
   }
 
+  const validTypes = ["exam", "quiz", "deadline", "project", "other"];
+  if (!validTypes.includes(body.type)) {
+    return NextResponse.json({ error: "Invalid event type" }, { status: 400 });
+  }
+  if (body.name.length > 200) {
+    return NextResponse.json({ error: "Event name too long" }, { status: 400 });
+  }
+  if (body.notes && body.notes.length > 1000) {
+    return NextResponse.json({ error: "Notes too long" }, { status: 400 });
+  }
+  if (isNaN(new Date(body.date).getTime())) {
+    return NextResponse.json({ error: "Invalid date" }, { status: 400 });
+  }
+
   const event = await prisma.event.create({
     data: {
       userId: session.user.id,

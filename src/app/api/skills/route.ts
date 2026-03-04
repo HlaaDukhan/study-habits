@@ -36,6 +36,9 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+    if (userTask.length > 500) {
+      return NextResponse.json({ error: "Task description too long" }, { status: 400 });
+    }
     const { prisma } = await import("@/lib/db/prisma");
     const updated = await prisma.skillProgress.updateMany({
       where: { userId: session.user.id, skillId, status: "active" },

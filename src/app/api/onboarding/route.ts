@@ -12,6 +12,25 @@ export async function POST(req: Request) {
   const userId = session.user.id;
   const body = await req.json();
 
+  if (body.studyGoal && body.studyGoal.length > 500) {
+    return NextResponse.json({ error: "Study goal too long" }, { status: 400 });
+  }
+  if (body.biggestChallenge && body.biggestChallenge.length > 500) {
+    return NextResponse.json({ error: "Challenge description too long" }, { status: 400 });
+  }
+  if (body.typicalHours !== undefined && body.typicalHours !== null) {
+    const hours = parseFloat(body.typicalHours);
+    if (isNaN(hours) || hours < 0 || hours > 24) {
+      return NextResponse.json({ error: "typicalHours must be between 0 and 24" }, { status: 400 });
+    }
+  }
+  if (body.eventName && body.eventName.length > 200) {
+    return NextResponse.json({ error: "Event name too long" }, { status: 400 });
+  }
+  if (body.eventDate && isNaN(new Date(body.eventDate).getTime())) {
+    return NextResponse.json({ error: "Invalid event date" }, { status: 400 });
+  }
+
   // Update profile with self-assessment
   await prisma.userProfile.upsert({
     where: { userId },

@@ -18,6 +18,9 @@ export async function POST(req: Request) {
   if (!message || typeof message !== "string") {
     return NextResponse.json({ error: "Message required" }, { status: 400 });
   }
+  if (message.trim().length > 2000) {
+    return NextResponse.json({ error: "Message too long (max 2000 characters)" }, { status: 400 });
+  }
 
   const userId = session.user.id;
 

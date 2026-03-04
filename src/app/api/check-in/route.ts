@@ -16,6 +16,24 @@ export async function POST(req: Request) {
   const userId = session.user.id;
   const body = await req.json();
 
+  const validFocusLevels = ["none", "brief", "focused", "deep"];
+  const validDecayPoints = ["<10m", "10-25m", "25-45m", "45-60m", "no_loss"];
+  if (body.focusLevel && !validFocusLevels.includes(body.focusLevel)) {
+    return NextResponse.json({ error: "Invalid focusLevel" }, { status: 400 });
+  }
+  if (body.decayPoint && !validDecayPoints.includes(body.decayPoint)) {
+    return NextResponse.json({ error: "Invalid decayPoint" }, { status: 400 });
+  }
+  if (body.contextNote && body.contextNote.length > 1000) {
+    return NextResponse.json({ error: "Context note too long" }, { status: 400 });
+  }
+  if (body.energy !== undefined && body.energy !== null && (body.energy < 1 || body.energy > 5)) {
+    return NextResponse.json({ error: "Energy must be 1–5" }, { status: 400 });
+  }
+  if (body.mood !== undefined && body.mood !== null && (body.mood < 1 || body.mood > 5)) {
+    return NextResponse.json({ error: "Mood must be 1–5" }, { status: 400 });
+  }
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
