@@ -5,7 +5,8 @@ import { sendPasswordResetEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
-    const { email, resend } = await req.json();
+    const { email: rawEmail, resend } = await req.json();
+    const email = rawEmail?.toLowerCase().trim();
 
     if (!email) {
       return NextResponse.json(
