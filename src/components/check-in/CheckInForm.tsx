@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -26,6 +27,15 @@ const decayOptions = [
   { value: "no_loss", label: "No loss" },
 ];
 
+const missReasonOptions = [
+  "Too busy",
+  "Forgot",
+  "Felt overwhelmed",
+  "Wasn't in the mood",
+  "External event",
+  "Other",
+];
+
 export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -36,10 +46,18 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
   const [atypical, setAtypical] = useState(false);
   const [energy, setEnergy] = useState<number | null>(null);
   const [mood, setMood] = useState<number | null>(null);
+  const [missReason, setMissReason] = useState<string | null>(null);
+  const [otherMissReason, setOtherMissReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   const showDecay = activeSkillSlug === "focus-endurance" && focusLevel && focusLevel !== "none";
+
+  const getFinalMissReason = () => {
+    if (!missReason) return null;
+    if (missReason === "Other") return otherMissReason.trim() || "Other";
+    return missReason;
+  };
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -57,6 +75,7 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
           atypical,
           energy,
           mood,
+          missReason: getFinalMissReason(),
         }),
       });
 
@@ -91,7 +110,7 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
                 variant="outline"
                 onClick={() => {
                   setInitiated(opt.value);
-                  setStep(opt.value ? 1 : 3);
+                  setStep(opt.value ? 1 : 2);
                 }}
                 className={`flex-1 py-6 ${
                   initiated === opt.value
@@ -106,8 +125,51 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
         </CardContent>
       </Card>
 
-      {/* Step 2: Focus level */}
-      {(step >= 1 && initiated) && (
+      {/* Step 2: Why did you miss? (only when not studied) */}
+      {step >= 2 && initiated === false && (
+        <Card className="bg-card border-border">
+          <CardContent className="pt-6 space-y-3">
+            <h3 className="text-foreground text-lg mb-2">Why did you miss?</h3>
+            {missReasonOptions.map((opt) => (
+              <Button
+                key={opt}
+                variant="outline"
+                onClick={() => {
+                  setMissReason(opt);
+                  if (opt !== "Other") setStep(3);
+                }}
+                className={`w-full text-left justify-start py-4 ${
+                  missReason === opt
+                    ? "border-[#38bdf8] text-[#38bdf8] bg-[#38bdf8]/10"
+                    : "border-border text-muted-foreground hover:border-muted-foreground"
+                }`}
+              >
+                {opt}
+              </Button>
+            ))}
+            {missReason === "Other" && (
+              <div className="space-y-2">
+                <Input
+                  value={otherMissReason}
+                  onChange={(e) => setOtherMissReason(e.target.value)}
+                  placeholder="What happened?"
+                  className="bg-surface-inset border-border text-foreground"
+                />
+                <Button
+                  onClick={() => setStep(3)}
+                  disabled={!otherMissReason.trim()}
+                  className="w-full bg-[#38bdf8] hover:bg-[#38bdf8]/80 text-black font-semibold"
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Step 2: Focus level (only when studied) */}
+      {step >= 1 && initiated === true && (
         <Card className="bg-card border-border">
           <CardContent className="pt-6">
             <h3 className="text-foreground text-lg mb-4">How was your focus?</h3>
@@ -118,7 +180,7 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
                   variant="outline"
                   onClick={() => {
                     setFocusLevel(opt.value);
-                    setStep(2);
+                    setStep(3);
                   }}
                   className={`py-6 flex flex-col items-center gap-1 h-auto ${
                     focusLevel === opt.value
@@ -135,8 +197,8 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
         </Card>
       )}
 
-      {/* Step 2.5: Decay point (Focus Endurance only) */}
-      {step >= 2 && showDecay && (
+      {/* Decay point (Focus Endurance only) */}
+      {step >= 3 && showDecay && (
         <Card className="bg-card border-border">
           <CardContent className="pt-6">
             <h3 className="text-foreground text-lg mb-4">When did focus drop?</h3>
@@ -160,8 +222,8 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
         </Card>
       )}
 
-      {/* Step 3: Context & optional fields */}
-      {step >= 2 || (step >= 3 && !initiated) ? (
+      {/* Context & optional fields */}
+      {step >= 3 && (
         <Card className="bg-card border-border">
           <CardContent className="pt-6 space-y-4">
             <div>
@@ -199,9 +261,7 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
                       key={v}
                       onClick={() => setEnergy(energy === v ? null : v)}
                       className={`flex-1 h-6 rounded ${
-                        energy && v <= energy
-                          ? "bg-[#38bdf8]"
-                          : "bg-secondary"
+                        energy && v <= energy ? "bg-[#38bdf8]" : "bg-secondary"
                       } transition-colors`}
                     />
                   ))}
@@ -215,9 +275,7 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
                       key={v}
                       onClick={() => setMood(mood === v ? null : v)}
                       className={`flex-1 h-6 rounded ${
-                        mood && v <= mood
-                          ? "bg-[#4ade80]"
-                          : "bg-secondary"
+                        mood && v <= mood ? "bg-[#4ade80]" : "bg-secondary"
                       } transition-colors`}
                     />
                   ))}
@@ -236,7 +294,7 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
             </Button>
           </CardContent>
         </Card>
-      ) : null}
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/session";
 import { prisma } from "@/lib/db/prisma";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { PhaseBanner } from "@/components/dashboard/PhaseBanner";
 import { ActiveSkillCard } from "@/components/dashboard/ActiveSkillCard";
 import { CheckInWidget } from "@/components/dashboard/CheckInWidget";
@@ -20,7 +21,7 @@ export default async function DashboardPage() {
     redirect("/onboarding");
   }
 
-  const [activePhase, skillProgresses, recentCheckIns, upcomingEvents] =
+  const [activePhase, skillProgresses, recentCheckIns, upcomingEvents, userProfile] =
     await Promise.all([
       prisma.activePhase.findUnique({ where: { userId } }),
       prisma.skillProgress.findMany({
@@ -37,6 +38,7 @@ export default async function DashboardPage() {
         orderBy: { date: "asc" },
         take: 3,
       }),
+      prisma.userProfile.findUnique({ where: { userId } }),
     ]);
 
   const phase = activePhase?.phase || "onboarding";
@@ -80,6 +82,23 @@ export default async function DashboardPage() {
     ),
   }));
 
+  // Parse challenges from profile
+  let challenges: string[] = [];
+  if (userProfile?.biggestChallenge) {
+    try {
+      const parsed = JSON.parse(userProfile.biggestChallenge);
+      challenges = Array.isArray(parsed) ? parsed : [userProfile.biggestChallenge];
+    } catch {
+      challenges = [userProfile.biggestChallenge];
+    }
+  }
+
+  const weekPhaseLabels: Record<number, { label: string; description: string }> = {
+    1: { label: "Week 1 — Stabilize", description: "Getting comfortable. The habit stays easy. Just show up." },
+    2: { label: "Week 2 — Express", description: "Skill is taking shape. Small adjustments are allowed." },
+    3: { label: "Week 3 — Probe", description: "Testing your limits. Data collected for the next skill unlock." },
+  };
+
   const radarSkills = skillProgresses
     .sort((a, b) => a.skill.tier - b.skill.tier)
     .map((sp) => ({
@@ -96,6 +115,73 @@ export default async function DashboardPage() {
         activeSkillName={activeSkillProgress?.skill.name}
         weekPhase={activeSkillProgress?.weekPhase}
       />
+
+      {/* Observation phase nudge */}
+      {phase === "observation" && (
+        <div className="mb-6 bg-card border border-[#38bdf8]/30 rounded-xl p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h3 className="text-foreground font-semibold mb-1">You&apos;re in observation mode</h3>
+              <p className="text-muted-foreground text-sm mb-3">
+                Study as you normally would and log your daily check-ins. After 5+ check-ins we&apos;ll unlock your first skill.
+                If you&apos;re noticing patterns — distractions, low energy, trouble starting — talk to your coach about them now.
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div
+                      key={i}
+                      className={`w-6 h-2 rounded ${
+                        i <= recentCheckIns.length ? "bg-[#38bdf8]" : "bg-secondary"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-muted-foreground text-xs">{Math.min(recentCheckIns.length, 5)}/5 check-ins</span>
+              </div>
+            </div>
+            <Link
+              href="/chat"
+              className="shrink-0 px-4 py-2 rounded-lg bg-[#38bdf8]/10 border border-[#38bdf8]/30 text-[#38bdf8] text-sm font-medium hover:bg-[#38bdf8]/20 transition-colors"
+            >
+              Talk to coach →
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Plan card — visible when skill training is active */}
+      {phase === "skill_training" && activeSkillProgress && (
+        <div className="mb-6 bg-card border border-border rounded-xl p-6">
+          <h3 className="text-foreground font-semibold mb-3">Your Plan</h3>
+          <div className="space-y-3 text-sm">
+            {challenges.length > 0 && (
+              <div>
+                <span className="text-muted-foreground">Identified challenges: </span>
+                <span className="text-foreground">{challenges.join(", ")}</span>
+              </div>
+            )}
+            <div>
+              <span className="text-muted-foreground">Working on: </span>
+              <span className="text-[#38bdf8] font-medium">{activeSkillProgress.skill.name}</span>
+              <span className="text-muted-foreground"> — {activeSkillProgress.skill.description}</span>
+            </div>
+            {activeSkillProgress.weekPhase > 0 && weekPhaseLabels[activeSkillProgress.weekPhase] && (
+              <div className="bg-surface-inset rounded-lg p-3">
+                <p className="text-foreground font-medium text-xs mb-1">
+                  {weekPhaseLabels[activeSkillProgress.weekPhase].label}
+                </p>
+                <p className="text-muted-foreground text-xs">
+                  {weekPhaseLabels[activeSkillProgress.weekPhase].description}
+                </p>
+              </div>
+            )}
+            <div className="text-muted-foreground/70 text-xs border-t border-border pt-3">
+              If you fall off: log it, note why, and keep going. One missed day doesn&apos;t reset your progress.
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {activeSkillProgress ? (

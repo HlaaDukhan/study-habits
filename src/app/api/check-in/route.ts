@@ -27,6 +27,9 @@ export async function POST(req: Request) {
   if (body.contextNote && body.contextNote.length > 1000) {
     return NextResponse.json({ error: "Context note too long" }, { status: 400 });
   }
+  if (body.missReason && body.missReason.length > 500) {
+    return NextResponse.json({ error: "Miss reason too long" }, { status: 400 });
+  }
   if (body.energy !== undefined && body.energy !== null && (body.energy < 1 || body.energy > 5)) {
     return NextResponse.json({ error: "Energy must be 1–5" }, { status: 400 });
   }
@@ -67,6 +70,7 @@ export async function POST(req: Request) {
       energy: body.energy || null,
       mood: body.mood || null,
       backfilled: body.backfilled ?? false,
+      missReason: body.missReason || null,
     },
   });
 

@@ -73,6 +73,7 @@ export async function buildUserContext(userId: string): Promise<string> {
         ci.atypical ? "ATYPICAL" : null,
         ci.energy ? `energy=${ci.energy}/5` : null,
         ci.mood ? `mood=${ci.mood}/5` : null,
+        (ci as { missReason?: string | null }).missReason ? `missed_because=${(ci as { missReason?: string | null }).missReason}` : null,
       ].filter(Boolean);
       lines.push(`  ${parts.join(", ")}`);
     }
@@ -103,7 +104,18 @@ export async function buildUserContext(userId: string): Promise<string> {
       const sa = JSON.parse(profile.selfAssessment);
       lines.push("\nSelf-assessment:");
       if (sa.studyGoal) lines.push(`  Goal: ${sa.studyGoal}`);
-      if (sa.biggestChallenge) lines.push(`  Biggest challenge: ${sa.biggestChallenge}`);
+      if (sa.biggestChallenge) {
+        try {
+          const challenges = JSON.parse(sa.biggestChallenge);
+          if (Array.isArray(challenges)) {
+            lines.push(`  Biggest challenges: ${challenges.join(", ")}`);
+          } else {
+            lines.push(`  Biggest challenge: ${sa.biggestChallenge}`);
+          }
+        } catch {
+          lines.push(`  Biggest challenge: ${sa.biggestChallenge}`);
+        }
+      }
       if (sa.preferredTime) lines.push(`  Preferred study time: ${sa.preferredTime}`);
     } catch {
       // ignore parse errors

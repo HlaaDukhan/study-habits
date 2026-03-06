@@ -7,13 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const challenges = [
+const challengeOptions = [
   "Starting is the hardest part",
   "I get distracted easily",
   "I study but nothing sticks",
   "I can't focus for long",
   "I procrastinate until the last minute",
   "I don't know what to study first",
+  "Other",
 ];
 
 const times = [
@@ -29,13 +30,27 @@ export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [studyGoal, setStudyGoal] = useState("");
-  const [biggestChallenge, setBiggestChallenge] = useState("");
+  const [selectedChallenges, setSelectedChallenges] = useState<string[]>([]);
+  const [otherChallenge, setOtherChallenge] = useState("");
   const [preferredTime, setPreferredTime] = useState("");
   const [typicalHours, setTypicalHours] = useState("");
   const [eventName, setEventName] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [eventType, setEventType] = useState("exam");
   const [submitting, setSubmitting] = useState(false);
+
+  const toggleChallenge = (c: string) => {
+    setSelectedChallenges((prev) =>
+      prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]
+    );
+  };
+
+  const buildBiggestChallenge = () => {
+    const items = selectedChallenges.map((c) =>
+      c === "Other" ? otherChallenge.trim() || "Other" : c
+    ).filter(Boolean);
+    return JSON.stringify(items);
+  };
 
   const handleComplete = async () => {
     setSubmitting(true);
@@ -45,7 +60,7 @@ export default function OnboardingPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           studyGoal,
-          biggestChallenge,
+          biggestChallenge: buildBiggestChallenge(),
           preferredTime,
           typicalHours,
           eventName,
@@ -125,18 +140,16 @@ export default function OnboardingPage() {
               <CardTitle className="text-foreground text-xl">
                 What trips you up most?
               </CardTitle>
+              <p className="text-muted-foreground text-sm">Select all that apply.</p>
             </CardHeader>
             <CardContent className="space-y-3">
-              {challenges.map((c) => (
+              {challengeOptions.map((c) => (
                 <Button
                   key={c}
                   variant="outline"
-                  onClick={() => {
-                    setBiggestChallenge(c);
-                    setStep(2);
-                  }}
+                  onClick={() => toggleChallenge(c)}
                   className={`w-full text-left justify-start py-4 ${
-                    biggestChallenge === c
+                    selectedChallenges.includes(c)
                       ? "border-[#38bdf8] text-[#38bdf8] bg-[#38bdf8]/10"
                       : "border-border text-muted-foreground hover:border-muted-foreground"
                   }`}
@@ -144,6 +157,21 @@ export default function OnboardingPage() {
                   {c}
                 </Button>
               ))}
+              {selectedChallenges.includes("Other") && (
+                <Input
+                  value={otherChallenge}
+                  onChange={(e) => setOtherChallenge(e.target.value)}
+                  placeholder="Describe your challenge..."
+                  className="bg-surface-inset border-border text-foreground"
+                />
+              )}
+              <Button
+                onClick={() => setStep(2)}
+                disabled={selectedChallenges.length === 0}
+                className="w-full bg-[#38bdf8] hover:bg-[#38bdf8]/80 text-black font-semibold mt-2"
+              >
+                Next
+              </Button>
             </CardContent>
           </Card>
         )}

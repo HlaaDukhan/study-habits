@@ -117,6 +117,7 @@ model CheckIn {
   energy       Int?     // 1-5
   mood         Int?     // 1-5
   backfilled   Boolean  @default(false)
+  missReason   String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
