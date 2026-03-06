@@ -3,9 +3,11 @@
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { Sun, Moon } from "lucide-react";
+import { useLanguage } from "@/lib/language";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const { t } = useLanguage();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
@@ -20,7 +22,7 @@ export function ThemeToggle() {
     >
       {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
       <span className="text-sm font-medium">
-        {theme === "dark" ? "Light Mode" : "Dark Mode"}
+        {theme === "dark" ? t("lightMode") : t("darkMode")}
       </span>
     </button>
   );

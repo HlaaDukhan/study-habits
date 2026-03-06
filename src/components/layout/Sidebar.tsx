@@ -17,20 +17,23 @@ import {
   X,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
-
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/check-in", label: "Check In", icon: CheckSquare },
-  { href: "/skills", label: "Skills", icon: GitBranch },
-  { href: "/chat", label: "AI Coach", icon: MessageSquare },
-  { href: "/events", label: "Events", icon: CalendarDays },
-  { href: "/history", label: "History", icon: History },
-  { href: "/settings", label: "Settings", icon: Settings },
-];
+import { LanguageToggle } from "./LanguageToggle";
+import { useLanguage } from "@/lib/language";
 
 export function Sidebar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { t } = useLanguage();
+
+  const navItems = [
+    { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboard },
+    { href: "/check-in", labelKey: "checkIn", icon: CheckSquare },
+    { href: "/skills", labelKey: "skills", icon: GitBranch },
+    { href: "/chat", labelKey: "aiCoach", icon: MessageSquare },
+    { href: "/events", labelKey: "events", icon: CalendarDays },
+    { href: "/history", labelKey: "history", icon: History },
+    { href: "/settings", labelKey: "settings", icon: Settings },
+  ];
 
   const navContent = (
     <>
@@ -49,7 +52,7 @@ export function Sidebar() {
               }`}
             >
               <item.icon size={18} />
-              <span className="text-sm font-medium">{item.label}</span>
+              <span className="text-sm font-medium">{t(item.labelKey)}</span>
             </Link>
           );
         })}
@@ -57,12 +60,13 @@ export function Sidebar() {
 
       <div className="p-3 border-t border-border">
         <ThemeToggle />
+        <LanguageToggle />
         <button
           onClick={() => signOut({ callbackUrl: "/" })}
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary w-full transition-colors"
         >
           <LogOut size={18} />
-          <span className="text-sm font-medium">Sign Out</span>
+          <span className="text-sm font-medium">{t("signOut")}</span>
         </button>
       </div>
     </>
