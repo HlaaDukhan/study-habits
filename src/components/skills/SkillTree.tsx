@@ -12,6 +12,18 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Target,
+  Play,
+  Eye,
+  Shield,
+  Timer,
+  Battery,
+  LayoutGrid,
+  CalendarDays,
+  Lock,
+  CheckCircle2,
+} from "lucide-react";
 
 interface SkillNode {
   id: string;
@@ -35,46 +47,52 @@ interface SkillTreeProps {
   canActivate: boolean;
 }
 
-const statusStyles: Record<string, { border: string; bg: string; text: string; glow: string }> = {
-  locked: {
-    border: "border-muted-foreground/30",
-    bg: "bg-card",
-    text: "text-muted-foreground/60",
-    glow: "",
-  },
-  available: {
-    border: "border-border",
-    bg: "bg-card",
-    text: "text-muted-foreground",
-    glow: "",
-  },
-  active: {
-    border: "border-[#38bdf8]",
-    bg: "bg-[#38bdf8]/5",
-    text: "text-[#38bdf8]",
-    glow: "shadow-[0_0_15px_rgba(56,189,248,0.15)]",
-  },
-  stable: {
-    border: "border-[#4ade80]",
-    bg: "bg-[#4ade80]/5",
-    text: "text-[#4ade80]",
-    glow: "",
-  },
-  mastered: {
-    border: "border-[#fbbf24]",
-    bg: "bg-[#fbbf24]/5",
-    text: "text-[#fbbf24]",
-    glow: "shadow-[0_0_15px_rgba(251,191,36,0.15)]",
-  },
+const tierConfig: Record<number, { color: string; bg: string; label: string }> = {
+  1: { color: "#38bdf8", bg: "rgba(56,189,248,0.07)",  label: "Foundation" },
+  2: { color: "#a855f7", bg: "rgba(168,85,247,0.07)", label: "Structure"  },
+  3: { color: "#f97316", bg: "rgba(249,115,22,0.07)", label: "Endurance"  },
+  4: { color: "#fbbf24", bg: "rgba(251,191,36,0.07)", label: "Mastery"    },
 };
+
+const skillIconMap: Record<string, React.ElementType> = {
+  "task-clarity":        Target,
+  "initiation":          Play,
+  "focus-containment":   Eye,
+  "environment-control": Shield,
+  "focus-endurance":     Timer,
+  "cognitive-recovery":  Battery,
+  "planning-sequencing": LayoutGrid,
+  "deadline-calibration": CalendarDays,
+};
+
+// [fromCardIndex, toCardIndex] (0 = left card, 1 = right card) between tier N and tier N+1
+const tierConnections: Record<number, [number, number][]> = {
+  1: [[0, 0], [0, 1], [1, 0], [1, 1]], // both T1 skills → both T2 skills
+  2: [[0, 0], [0, 1], [1, 1]],          // FC→FE, FC→CR, EC→CR
+  3: [[0, 0], [1, 0]],                   // FE→PS, CR→PS (both converge left)
+};
+
+function getCardStyle(status: string, tier: number) {
+  const tc = tierConfig[tier] ?? tierConfig[1];
+  switch (status) {
+    case "available":
+      return { borderColor: tc.color + "70", bg: tc.bg, textColor: tc.color, iconColor: tc.color };
+    case "active":
+      return { borderColor: tc.color, bg: tc.bg, textColor: tc.color, iconColor: tc.color };
+    case "stable":
+      return { borderColor: "#4ade80", bg: "rgba(74,222,128,0.07)", textColor: "#4ade80", iconColor: "#4ade80" };
+    case "mastered":
+      return { borderColor: "#fbbf24", bg: "rgba(251,191,36,0.07)", textColor: "#fbbf24", iconColor: "#fbbf24" };
+    default: // locked
+      return { borderColor: "rgba(100,100,120,0.25)", bg: "transparent", textColor: "rgba(150,150,160,0.45)", iconColor: "rgba(150,150,160,0.3)" };
+  }
+}
 
 export function SkillTree({ skills, canActivate }: SkillTreeProps) {
   const router = useRouter();
   const [selected, setSelected] = useState<SkillNode | null>(null);
   const [userTask, setUserTask] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const tiers = [1, 2, 3, 4];
 
   const handleActivate = async (skillId: string) => {
     setLoading(true);
@@ -110,38 +128,153 @@ export function SkillTree({ skills, canActivate }: SkillTreeProps) {
 
   return (
     <>
-      <div className="space-y-8">
-        {tiers.map((tier) => {
+      <div>
+        {[1, 2, 3, 4].map((tier) => {
           const tierSkills = skills.filter((s) => s.tier === tier);
+          const tc = tierConfig[tier];
+          const connections = tierConnections[tier];
+
           return (
             <div key={tier}>
-              <h3 className="text-muted-foreground/70 text-xs font-medium uppercase tracking-wider mb-3">
-                Tier {tier}
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Tier label */}
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-1 h-4 rounded-full" style={{ backgroundColor: tc.color }} />
+                <span
+                  className="text-[11px] font-bold uppercase tracking-widest"
+                  style={{ color: tc.color + "bb" }}
+                >
+                  Tier {tier} — {tc.label}
+                </span>
+              </div>
+
+              {/* Skill cards */}
+              <div className="grid grid-cols-2 gap-3">
                 {tierSkills.map((skill) => {
-                  const style = statusStyles[skill.currentStatus] || statusStyles.locked;
+                  const s = getCardStyle(skill.currentStatus, tier);
+                  const Icon = skillIconMap[skill.slug] ?? Target;
+                  const isLocked = skill.currentStatus === "locked";
+                  const isActive = skill.currentStatus === "active";
+                  const isStableOrMastered =
+                    skill.currentStatus === "stable" || skill.currentStatus === "mastered";
+
                   return (
                     <button
                       key={skill.id}
                       onClick={() => setSelected(skill)}
-                      className={`flex-1 border-2 rounded-xl p-4 text-left transition-all hover:scale-[1.02] ${style.border} ${style.bg} ${style.glow}`}
+                      className="relative rounded-xl p-4 text-left transition-all hover:scale-[1.02] border-2"
+                      style={{
+                        borderColor: s.borderColor,
+                        backgroundColor: s.bg || "var(--card)",
+                        boxShadow: isActive ? `0 0 18px ${tc.color}28` : undefined,
+                      }}
                     >
-                      <p className={`font-medium text-sm ${style.text}`}>
+                      {/* Lock icon top-right */}
+                      {isLocked && (
+                        <Lock
+                          size={11}
+                          className="absolute top-2.5 right-2.5"
+                          style={{ color: "rgba(150,150,160,0.35)" }}
+                        />
+                      )}
+
+                      {/* Status badge top-right */}
+                      {!isLocked && (
+                        <span
+                          className="absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                          style={{ color: s.textColor, backgroundColor: s.borderColor + "25" }}
+                        >
+                          {skill.currentStatus === "available"
+                            ? "Ready"
+                            : skill.currentStatus === "active"
+                            ? "Active"
+                            : skill.currentStatus === "stable"
+                            ? "Stable"
+                            : "Mastered"}
+                        </span>
+                      )}
+
+                      {/* Icon */}
+                      <div className="mb-2.5">
+                        <Icon size={20} style={{ color: s.iconColor }} />
+                      </div>
+
+                      {/* Name */}
+                      <p
+                        className="font-semibold text-sm leading-snug"
+                        style={{ color: s.textColor }}
+                      >
                         {skill.name}
                       </p>
-                      <p className="text-xs text-muted-foreground/70 mt-1 capitalize">
-                        {skill.currentStatus}
-                      </p>
+
+                      {/* Active: mini stability bar + week */}
+                      {isActive && skill.progress && (
+                        <div className="mt-2.5">
+                          <div className="h-1 bg-secondary rounded-full overflow-hidden">
+                            <div
+                              className="h-full rounded-full"
+                              style={{
+                                width: `${skill.progress.stabilityScore * 100}%`,
+                                backgroundColor: tc.color,
+                              }}
+                            />
+                          </div>
+                          <p className="text-[10px] mt-1" style={{ color: tc.color + "99" }}>
+                            Week {skill.progress.weekPhase}/3 ·{" "}
+                            {(skill.progress.stabilityScore * 100).toFixed(0)}% stable
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Stable / mastered checkmark */}
+                      {isStableOrMastered && (
+                        <CheckCircle2
+                          size={13}
+                          className="mt-2"
+                          style={{ color: s.textColor }}
+                        />
+                      )}
+
+                      {/* Within-tier dependency hint for deadline-calibration */}
+                      {skill.slug === "deadline-calibration" && (
+                        <p
+                          className="text-[10px] mt-1.5"
+                          style={{ color: "rgba(150,150,160,0.45)" }}
+                        >
+                          ← needs Planning first
+                        </p>
+                      )}
                     </button>
                   );
                 })}
               </div>
-              {tier < 4 && (
-                <div className="flex justify-center my-2">
-                  <div className="w-px h-6 bg-border" />
-                </div>
+
+              {/* SVG connector lines to next tier */}
+              {connections && tier < 4 && (
+                <svg
+                  width="100%"
+                  height="32"
+                  className="block"
+                  preserveAspectRatio="none"
+                >
+                  {connections.map(([from, to], i) => {
+                    const xs = [25, 75];
+                    return (
+                      <line
+                        key={i}
+                        x1={`${xs[from]}%`}
+                        y1="0"
+                        x2={`${xs[to]}%`}
+                        y2="32"
+                        stroke={tc.color}
+                        strokeWidth="1.5"
+                        strokeOpacity="0.22"
+                      />
+                    );
+                  })}
+                </svg>
               )}
+
+              {tier < 4 && !connections && <div className="h-8" />}
             </div>
           );
         })}
@@ -150,119 +283,125 @@ export function SkillTree({ skills, canActivate }: SkillTreeProps) {
       {/* Skill detail dialog */}
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
         <DialogContent className="bg-card border-border text-foreground max-w-md">
-          {selected && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="text-foreground">
-                  {selected.name}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <p className="text-muted-foreground text-sm">{selected.description}</p>
-                <div className="bg-surface-inset rounded-lg p-3">
-                  <p className="text-xs text-muted-foreground/70 mb-1">Why this skill?</p>
-                  <p className="text-foreground/80 text-sm">{selected.purpose}</p>
-                </div>
-
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground/70">Status</span>
-                  <span className="capitalize text-foreground/80">
-                    {selected.currentStatus}
-                  </span>
-                </div>
-
-                {selected.progress && selected.currentStatus === "active" && (
-                  <>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground/70">Week</span>
-                      <span className="text-foreground/80">
-                        {selected.progress.weekPhase}/3
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground/70">Stability</span>
-                      <span className="text-[#4ade80]">
-                        {(selected.progress.stabilityScore * 100).toFixed(0)}%
-                      </span>
-                    </div>
-                    {selected.progress.userTask && (
-                      <div className="bg-surface-inset rounded-lg p-3">
-                        <p className="text-xs text-muted-foreground/70 mb-1">Your task</p>
-                        <p className="text-foreground/80 text-sm">
-                          {selected.progress.userTask}
-                        </p>
-                      </div>
-                    )}
-                    {!selected.progress.userTask && (
-                      <div className="space-y-2">
-                        <Label className="text-foreground/80 text-sm">
-                          Define your task (time/place/action)
-                        </Label>
-                        <Input
-                          value={userTask}
-                          onChange={(e) => setUserTask(e.target.value)}
-                          placeholder="e.g., At 8am at my desk, I will open my textbook"
-                          className="bg-surface-inset border-border text-foreground"
-                        />
-                        <Button
-                          onClick={() => handleSetTask(selected.id)}
-                          disabled={loading || !userTask.trim()}
-                          className="w-full bg-[#38bdf8] hover:bg-[#38bdf8]/80 text-black"
-                        >
-                          {loading ? "Saving..." : "Set Task"}
-                        </Button>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                {selected.currentStatus === "available" && canActivate && (
-                  <Button
-                    onClick={() => handleActivate(selected.id)}
-                    disabled={loading}
-                    className="w-full bg-[#38bdf8] hover:bg-[#38bdf8]/80 text-black font-semibold"
-                  >
-                    {loading ? "Activating..." : "Activate This Skill"}
-                  </Button>
-                )}
-
-                {selected.currentStatus === "locked" && (
-                  <div className="space-y-3">
-                    {selected.prerequisites.length > 0 && (
-                      <div className="bg-surface-inset rounded-lg p-3 space-y-2">
-                        <p className="text-xs text-muted-foreground/70 font-medium">
-                          Required to unlock
-                        </p>
-                        {selected.prerequisites.map((p) => (
-                          <div key={p.slug} className="flex items-center gap-2 text-sm">
-                            <span className={p.met ? "text-[#4ade80]" : "text-muted-foreground/50"}>
-                              {p.met ? "✓" : "○"}
-                            </span>
-                            <span className={p.met ? "text-foreground/80 line-through" : "text-muted-foreground/70"}>
-                              {p.name}
-                            </span>
-                            {p.met && (
-                              <span className="text-[#4ade80] text-xs">Stable</span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    <p className="text-muted-foreground/60 text-xs text-center">
-                      Prerequisites must reach Stable (3-week cycle complete) to unlock this skill.
-                    </p>
+          {selected && (() => {
+            const Icon = skillIconMap[selected.slug] ?? Target;
+            const tc = tierConfig[selected.tier];
+            return (
+              <>
+                <DialogHeader>
+                  <DialogTitle className="text-foreground flex items-center gap-2">
+                    <Icon size={18} style={{ color: tc.color }} />
+                    {selected.name}
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <p className="text-muted-foreground text-sm">{selected.description}</p>
+                  <div className="bg-surface-inset rounded-lg p-3">
+                    <p className="text-xs text-muted-foreground/70 mb-1">Why this skill?</p>
+                    <p className="text-foreground/80 text-sm">{selected.purpose}</p>
                   </div>
-                )}
 
-                <Link
-                  href={`/skills/${selected.slug}`}
-                  className="block text-center text-muted-foreground hover:text-[#38bdf8] text-sm mt-2 transition-colors"
-                >
-                  View full details
-                </Link>
-              </div>
-            </>
-          )}
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground/70">Status</span>
+                    <span className="capitalize text-foreground/80">{selected.currentStatus}</span>
+                  </div>
+
+                  {selected.progress && selected.currentStatus === "active" && (
+                    <>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground/70">Week</span>
+                        <span className="text-foreground/80">{selected.progress.weekPhase}/3</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground/70">Stability</span>
+                        <span className="text-[#4ade80]">
+                          {(selected.progress.stabilityScore * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                      {selected.progress.userTask ? (
+                        <div className="bg-surface-inset rounded-lg p-3">
+                          <p className="text-xs text-muted-foreground/70 mb-1">Your task</p>
+                          <p className="text-foreground/80 text-sm">{selected.progress.userTask}</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <Label className="text-foreground/80 text-sm">
+                            Define your task (time/place/action)
+                          </Label>
+                          <Input
+                            value={userTask}
+                            onChange={(e) => setUserTask(e.target.value)}
+                            placeholder="e.g., At 8am at my desk, I will open my textbook"
+                            className="bg-surface-inset border-border text-foreground"
+                          />
+                          <Button
+                            onClick={() => handleSetTask(selected.id)}
+                            disabled={loading || !userTask.trim()}
+                            className="w-full text-black"
+                            style={{ backgroundColor: tc.color }}
+                          >
+                            {loading ? "Saving..." : "Set Task"}
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {selected.currentStatus === "available" && canActivate && (
+                    <Button
+                      onClick={() => handleActivate(selected.id)}
+                      disabled={loading}
+                      className="w-full font-semibold text-black"
+                      style={{ backgroundColor: tc.color }}
+                    >
+                      {loading ? "Activating..." : "Activate This Skill"}
+                    </Button>
+                  )}
+
+                  {selected.currentStatus === "locked" && (
+                    <div className="space-y-3">
+                      {selected.prerequisites.length > 0 && (
+                        <div className="bg-surface-inset rounded-lg p-3 space-y-2">
+                          <p className="text-xs text-muted-foreground/70 font-medium">
+                            Required to unlock
+                          </p>
+                          {selected.prerequisites.map((p) => (
+                            <div key={p.slug} className="flex items-center gap-2 text-sm">
+                              <span className={p.met ? "text-[#4ade80]" : "text-muted-foreground/50"}>
+                                {p.met ? "✓" : "○"}
+                              </span>
+                              <span
+                                className={
+                                  p.met
+                                    ? "text-foreground/80 line-through"
+                                    : "text-muted-foreground/70"
+                                }
+                              >
+                                {p.name}
+                              </span>
+                              {p.met && (
+                                <span className="text-[#4ade80] text-xs">Stable</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-muted-foreground/60 text-xs text-center">
+                        Prerequisites must reach Stable (3-week cycle complete) to unlock.
+                      </p>
+                    </div>
+                  )}
+
+                  <Link
+                    href={`/skills/${selected.slug}`}
+                    className="block text-center text-muted-foreground hover:text-[#38bdf8] text-sm mt-2 transition-colors"
+                  >
+                    View full details
+                  </Link>
+                </div>
+              </>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </>
