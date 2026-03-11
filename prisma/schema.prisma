@@ -116,10 +116,11 @@ model CheckIn {
   atypical     Boolean  @default(false)
   energy       Int?     // 1-5
   mood         Int?     // 1-5
-  backfilled   Boolean  @default(false)
-  missReason   String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  backfilled    Boolean  @default(false)
+  missReason    String?
+  studyMethod   String?  // JSON array of method keys
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@unique([userId, date])
 }

@@ -36,6 +36,15 @@ const missReasonOptions = [
   "Other",
 ];
 
+const studyMethodOptions = [
+  { value: "explain", label: "Explained it out loud" },
+  { value: "qa", label: "Practice questions / Q&A" },
+  { value: "mindmap", label: "Mind map" },
+  { value: "notes", label: "Wrote notes" },
+  { value: "record", label: "Voice / video recording" },
+  { value: "read", label: "Reading / watching" },
+];
+
 export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -48,6 +57,7 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
   const [mood, setMood] = useState<number | null>(null);
   const [missReason, setMissReason] = useState<string | null>(null);
   const [otherMissReason, setOtherMissReason] = useState("");
+  const [selectedMethods, setSelectedMethods] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -76,6 +86,7 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
           energy,
           mood,
           missReason: getFinalMissReason(),
+          studyMethod: selectedMethods.length > 0 ? selectedMethods : null,
         }),
       });
 
@@ -111,6 +122,7 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
                 onClick={() => {
                   setInitiated(opt.value);
                   setStep(opt.value ? 1 : 2);
+                  setSelectedMethods([]);
                 }}
                 className={`flex-1 py-6 ${
                   initiated === opt.value
@@ -136,7 +148,7 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
                 variant="outline"
                 onClick={() => {
                   setMissReason(opt);
-                  if (opt !== "Other") setStep(3);
+                  if (opt !== "Other") setStep(4);
                 }}
                 className={`w-full text-left justify-start py-4 ${
                   missReason === opt
@@ -156,7 +168,7 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
                   className="bg-surface-inset border-border text-foreground"
                 />
                 <Button
-                  onClick={() => setStep(3)}
+                  onClick={() => setStep(4)}
                   disabled={!otherMissReason.trim()}
                   className="w-full bg-[#38bdf8] hover:bg-[#38bdf8]/80 text-black font-semibold"
                 >
@@ -180,6 +192,7 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
                   variant="outline"
                   onClick={() => {
                     setFocusLevel(opt.value);
+                    setSelectedMethods([]);
                     setStep(3);
                   }}
                   className={`py-6 flex flex-col items-center gap-1 h-auto ${
@@ -198,7 +211,7 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
       )}
 
       {/* Decay point (Focus Endurance only) */}
-      {step >= 3 && showDecay && (
+      {step >= 4 && showDecay && (
         <Card className="bg-card border-border">
           <CardContent className="pt-6">
             <h3 className="text-foreground text-lg mb-4">When did focus drop?</h3>
@@ -222,8 +235,49 @@ export function CheckInForm({ activeSkillSlug }: CheckInFormProps) {
         </Card>
       )}
 
+      {/* Study methods (only when studied) */}
+      {step >= 3 && initiated === true && (
+        <Card className="bg-card border-border">
+          <CardContent className="pt-6 space-y-3">
+            <div className="flex items-start justify-between">
+              <h3 className="text-foreground text-lg">What method did you use?</h3>
+              <span className="text-muted-foreground/60 text-xs mt-1">(optional)</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {studyMethodOptions.map((opt) => {
+                const active = selectedMethods.includes(opt.value);
+                return (
+                  <Button
+                    key={opt.value}
+                    variant="outline"
+                    onClick={() =>
+                      setSelectedMethods((prev) =>
+                        active ? prev.filter((m) => m !== opt.value) : [...prev, opt.value]
+                      )
+                    }
+                    className={`text-sm py-3 h-auto text-left justify-start ${
+                      active
+                        ? "border-[#a855f7] text-[#a855f7] bg-[#a855f7]/10"
+                        : "border-border text-muted-foreground hover:border-muted-foreground"
+                    }`}
+                  >
+                    {opt.label}
+                  </Button>
+                );
+              })}
+            </div>
+            <Button
+              onClick={() => setStep(4)}
+              className="w-full bg-[#38bdf8] hover:bg-[#38bdf8]/80 text-black font-semibold"
+            >
+              {selectedMethods.length > 0 ? "Continue" : "Skip"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Context & optional fields */}
-      {step >= 3 && (
+      {step >= 4 && (
         <Card className="bg-card border-border">
           <CardContent className="pt-6 space-y-4">
             <div>

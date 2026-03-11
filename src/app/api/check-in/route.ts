@@ -30,6 +30,12 @@ export async function POST(req: Request) {
   if (body.missReason && body.missReason.length > 500) {
     return NextResponse.json({ error: "Miss reason too long" }, { status: 400 });
   }
+  const validMethods = ["explain", "qa", "mindmap", "notes", "record", "read"];
+  if (body.studyMethod !== undefined && body.studyMethod !== null) {
+    if (!Array.isArray(body.studyMethod) || body.studyMethod.some((m: unknown) => !validMethods.includes(m as string))) {
+      return NextResponse.json({ error: "Invalid studyMethod" }, { status: 400 });
+    }
+  }
   if (body.energy !== undefined && body.energy !== null && (body.energy < 1 || body.energy > 5)) {
     return NextResponse.json({ error: "Energy must be 1–5" }, { status: 400 });
   }
@@ -71,6 +77,7 @@ export async function POST(req: Request) {
       mood: body.mood || null,
       backfilled: body.backfilled ?? false,
       missReason: body.missReason || null,
+      studyMethod: body.studyMethod?.length > 0 ? JSON.stringify(body.studyMethod) : null,
     },
   });
 

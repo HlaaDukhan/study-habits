@@ -65,11 +65,17 @@ export async function buildUserContext(userId: string): Promise<string> {
     lines.push(`\nLast ${recentCheckIns.length} check-ins:`);
     for (const ci of recentCheckIns.slice(0, 7)) {
       const dateStr = ci.date.toISOString().split("T")[0];
+      let methods: string[] = [];
+      try {
+        const raw = (ci as { studyMethod?: string | null }).studyMethod;
+        if (raw) methods = JSON.parse(raw);
+      } catch { /* ignore */ }
       const parts = [
         `date=${dateStr}`,
         `studied=${ci.initiated}`,
         ci.focusLevel ? `focus=${ci.focusLevel}` : null,
         ci.decayPoint ? `decay=${ci.decayPoint}` : null,
+        methods.length > 0 ? `methods=${methods.join("+")}` : null,
         ci.atypical ? "ATYPICAL" : null,
         ci.energy ? `energy=${ci.energy}/5` : null,
         ci.mood ? `mood=${ci.mood}/5` : null,
@@ -85,6 +91,30 @@ export async function buildUserContext(userId: string): Promise<string> {
       (c) => c.focusLevel === "focused" || c.focusLevel === "deep"
     ).length;
     lines.push(`\n7-day summary: ${initiated}/7 initiated, ${focused}/7 focused+`);
+
+    // Method → focus correlation
+    const methodFocusMap: Record<string, { total: number; focused: number }> = {};
+    for (const ci of last7) {
+      let methods: string[] = [];
+      try {
+        const raw = (ci as { studyMethod?: string | null }).studyMethod;
+        if (raw) methods = JSON.parse(raw);
+      } catch { /* ignore */ }
+      for (const m of methods) {
+        if (!methodFocusMap[m]) methodFocusMap[m] = { total: 0, focused: 0 };
+        methodFocusMap[m].total++;
+        if (ci.focusLevel === "focused" || ci.focusLevel === "deep") {
+          methodFocusMap[m].focused++;
+        }
+      }
+    }
+    const methodEntries = Object.entries(methodFocusMap);
+    if (methodEntries.length > 0) {
+      const summary = methodEntries
+        .map(([m, s]) => `${m}(${s.focused}/${s.total} focused)`)
+        .join(", ");
+      lines.push(`Study method performance: ${summary}`);
+    }
   }
 
   // Events
