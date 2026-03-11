@@ -6,8 +6,16 @@ import { PhaseBanner } from "@/components/dashboard/PhaseBanner";
 import { ActiveSkillCard } from "@/components/dashboard/ActiveSkillCard";
 import { CheckInWidget } from "@/components/dashboard/CheckInWidget";
 import { EventCard } from "@/components/dashboard/EventCard";
-import { WeeklyTrendChart } from "@/components/dashboard/WeeklyTrendChart";
-import { SkillRadarChart } from "@/components/dashboard/SkillRadarChart";
+import dynamic from "next/dynamic";
+
+const WeeklyTrendChart = dynamic(
+  () => import("@/components/dashboard/WeeklyTrendChart").then((m) => ({ default: m.WeeklyTrendChart })),
+  { ssr: false, loading: () => <div className="h-48 bg-card rounded-xl animate-pulse" /> }
+);
+const SkillRadarChart = dynamic(
+  () => import("@/components/dashboard/SkillRadarChart").then((m) => ({ default: m.SkillRadarChart })),
+  { ssr: false, loading: () => <div className="h-48 bg-card rounded-xl animate-pulse" /> }
+);
 
 export default async function DashboardPage() {
   const session = await requireAuth();
@@ -21,7 +29,7 @@ export default async function DashboardPage() {
     redirect("/onboarding");
   }
 
-  const [activePhase, skillProgresses, recentCheckIns, upcomingEvents, userProfile] =
+  const [activePhase, skillProgresses, recentCheckIns, upcomingEvents] =
     await Promise.all([
       prisma.activePhase.findUnique({ where: { userId } }),
       prisma.skillProgress.findMany({
@@ -38,7 +46,6 @@ export default async function DashboardPage() {
         orderBy: { date: "asc" },
         take: 3,
       }),
-      prisma.userProfile.findUnique({ where: { userId } }),
     ]);
 
   const phase = activePhase?.phase || "onboarding";
@@ -84,12 +91,12 @@ export default async function DashboardPage() {
 
   // Parse challenges from profile
   let challenges: string[] = [];
-  if (userProfile?.biggestChallenge) {
+  if (profile?.biggestChallenge) {
     try {
-      const parsed = JSON.parse(userProfile.biggestChallenge);
-      challenges = Array.isArray(parsed) ? parsed : [userProfile.biggestChallenge];
+      const parsed = JSON.parse(profile.biggestChallenge);
+      challenges = Array.isArray(parsed) ? parsed : [profile.biggestChallenge];
     } catch {
-      challenges = [userProfile.biggestChallenge];
+      challenges = [profile.biggestChallenge];
     }
   }
 
