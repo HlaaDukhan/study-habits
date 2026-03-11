@@ -22,6 +22,7 @@ interface SkillNode {
   purpose: string;
   currentStatus: string;
   prereqsMet: boolean;
+  prerequisites: { name: string; slug: string; met: boolean }[];
   progress?: {
     weekPhase: number;
     stabilityScore: number;
@@ -226,9 +227,31 @@ export function SkillTree({ skills, canActivate }: SkillTreeProps) {
                 )}
 
                 {selected.currentStatus === "locked" && (
-                  <p className="text-muted-foreground/70 text-sm text-center">
-                    Complete prerequisite skills to unlock.
-                  </p>
+                  <div className="space-y-3">
+                    {selected.prerequisites.length > 0 && (
+                      <div className="bg-surface-inset rounded-lg p-3 space-y-2">
+                        <p className="text-xs text-muted-foreground/70 font-medium">
+                          Required to unlock
+                        </p>
+                        {selected.prerequisites.map((p) => (
+                          <div key={p.slug} className="flex items-center gap-2 text-sm">
+                            <span className={p.met ? "text-[#4ade80]" : "text-muted-foreground/50"}>
+                              {p.met ? "✓" : "○"}
+                            </span>
+                            <span className={p.met ? "text-foreground/80 line-through" : "text-muted-foreground/70"}>
+                              {p.name}
+                            </span>
+                            {p.met && (
+                              <span className="text-[#4ade80] text-xs">Stable</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <p className="text-muted-foreground/60 text-xs text-center">
+                      Prerequisites must reach Stable (3-week cycle complete) to unlock this skill.
+                    </p>
+                  </div>
                 )}
 
                 <Link

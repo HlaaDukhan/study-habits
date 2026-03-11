@@ -48,9 +48,22 @@ export default async function SkillDetailPage({
     atypical: ci.atypical,
   }));
 
+  const prereqIds = skill.dependsOn.map((dep) => dep.prerequisiteId);
+  const prereqProgresses =
+    prereqIds.length > 0
+      ? await prisma.skillProgress.findMany({
+          where: { userId, skillId: { in: prereqIds } },
+        })
+      : [];
+
   const prerequisites = skill.dependsOn.map((dep) => ({
     name: dep.prerequisite.name,
     slug: dep.prerequisite.slug,
+    met: prereqProgresses.some(
+      (p) =>
+        p.skillId === dep.prerequisiteId &&
+        (p.status === "stable" || p.status === "mastered")
+    ),
   }));
 
   const unlocksSkills = skill.requiredFor.map((dep) => ({

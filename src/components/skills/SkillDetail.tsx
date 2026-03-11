@@ -33,7 +33,7 @@ interface SkillDetailProps {
     focusLevel: string | null;
     atypical: boolean;
   }[];
-  prerequisites: { name: string; slug: string }[];
+  prerequisites: { name: string; slug: string; met?: boolean }[];
   unlocksSkills: { name: string; slug: string }[];
   canActivate: boolean;
 }
@@ -325,10 +325,44 @@ export function SkillDetail({
       )}
 
       {status === "locked" && (
-        <div className="bg-card border border-border rounded-xl p-6 text-center">
-          <Lock size={24} className="text-muted-foreground/60 mx-auto mb-2" />
-          <p className="text-muted-foreground/70 text-sm">
-            Complete prerequisite skills to unlock.
+        <div className="bg-card border border-border rounded-xl p-5 space-y-4">
+          <div className="flex items-center gap-3">
+            <Lock size={18} className="text-muted-foreground/60 shrink-0" />
+            <p className="text-muted-foreground/80 text-sm font-medium">
+              This skill is locked
+            </p>
+          </div>
+          {prerequisites.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground/60 uppercase tracking-wider font-medium">
+                Complete first
+              </p>
+              {prerequisites.map((p) => (
+                <Link
+                  key={p.slug}
+                  href={`/skills/${p.slug}`}
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg bg-surface-inset hover:bg-secondary transition-colors"
+                >
+                  <span className={p.met ? "text-[#4ade80]" : "text-muted-foreground/40"}>
+                    {p.met ? "✓" : "○"}
+                  </span>
+                  <span className={`text-sm ${p.met ? "text-foreground/60 line-through" : "text-muted-foreground"}`}>
+                    {p.name}
+                  </span>
+                  {p.met ? (
+                    <span className="ml-auto text-xs text-[#4ade80]">Stable</span>
+                  ) : (
+                    <span className="ml-auto text-xs text-muted-foreground/50">→</span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          )}
+          <p className="text-xs text-muted-foreground/50 leading-relaxed">
+            Each prerequisite must reach{" "}
+            <span className="text-[#4ade80]">Stable</span> — completed by going
+            through its 3-week training cycle with a stability score of 70% or
+            above. Progress is based on your check-in patterns.
           </p>
         </div>
       )}
